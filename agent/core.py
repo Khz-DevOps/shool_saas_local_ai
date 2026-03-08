@@ -163,8 +163,8 @@ def _make_agent():
     )
     return create_react_agent(
         model,
-        tools          = [get_school_intent_response],
-        state_modifier = _build_system_prompt(),
+        tools  = [get_school_intent_response],
+        prompt = _build_system_prompt(),
     )
 
 
@@ -188,7 +188,11 @@ def invoke(
 
     input_msgs = history + [HumanMessage(content=user_message)]
     t0         = time.perf_counter()
-    result     = _make_agent().invoke({"messages": input_msgs})
+    try:
+        result = _make_agent().invoke({"messages": input_msgs})
+    except Exception as exc:
+        log.error("invoke failed: %s", exc, exc_info=True)
+        raise
     elapsed    = time.perf_counter() - t0
 
     all_msgs  = result["messages"]
